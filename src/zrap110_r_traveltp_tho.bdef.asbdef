@@ -1,93 +1,129 @@
-managed;
+managed implementation in class zrap110_BP_TravelTP_THO unique;
 strict ( 2 );
 with draft;
 define behavior for ZRAP110_R_TRAVELTP_THO alias Travel
-implementation in class zrap110_BP_TravelTP_THO unique
-persistent table ZRAP110_ATRAVTHO
-draft table ZRAP110_DTRAVTHO
+persistent table zrap110_atravtho
+draft table zrap110_dtravtho
 etag master LocalLastChangedAt
 lock master total etag LastChangedAt
-authorization master( global )
+authorization master ( global )
+late numbering
 
 {
   field ( readonly )
-   LastChangedAt,
-   CreatedAt,
-   LocalLastChangedAt;
+  LocalLastChangedAt,
+  LastChangedAt;
 
-  field ( readonly : update )
-   TravelID;
-
+  field ( readonly ) TravelID;
+  field ( readonly ) TotalPrice;
+  field ( mandatory ) BeginDate, EndDate;
 
   create;
-  update;
-  delete;
+  update ( features : instance );
+  delete ( features : instance );
 
-  draft action Edit;
-  draft action Activate;
-  draft action Discard;
-  draft action Resume;
-  draft determine action Prepare;
-
-  mapping for ZRAP110_ATRAVTHO
+  //action(s)
+  action ( features : instance ) acceptTravel result [1] $self;
+  action ( features : instance ) rejectTravel result [1] $self;
+  internal action recalcTotalPrice;
+  static factory action createTravel parameter ZRAP110_A_Create_Travel_THO [1];
+  determine action checkDates
   {
-    TravelID = TRAVEL_ID;
-    AgencyID = AGENCY_ID;
-    CustomerID = CUSTOMER_ID;
-    BeginDate = BEGIN_DATE;
-    EndDate = END_DATE;
-    BookingFee = BOOKING_FEE;
-    TotalPrice = TOTAL_PRICE;
-    CurrencyCode = CURRENCY_CODE;
-    Description = DESCRIPTION;
-    OverallStatus = OVERALL_STATUS;
-    Attachment = ATTACHMENT;
-    MimeType = MIME_TYPE;
-    FileName = FILE_NAME;
-    LastChangedAt = LAST_CHANGED_AT;
-    CreatedBy = CREATED_BY;
-    CreatedAt = CREATED_AT;
-    LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
-    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    validation validateDates;
   }
 
-  association _Booking { create; with draft; }
+  // validation(s)
+  validation validateCustomer on save { create; field CustomerID; }
+  validation validateAgency on save { create; field AgencyID; }
+  validation validateDates on save { create; field BeginDate, EndDate; }
+
+  //determination(s)
+  determination setInitialTravelValues on modify { create; }
+  determination calculateTotalPrice on modify { create; field BookingFee, CurrencyCode; }
+
+  draft action ( features : instance ) Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare
+  {
+    validation validateCustomer;
+    validation validateAgency;
+    validation validateDates;
+    validation Booking~validateBookingStatus;
+  }
+
+  mapping for zrap110_atravtho
+    {
+      TravelID           = TRAVEL_ID;
+      AgencyID           = AGENCY_ID;
+      CustomerID         = CUSTOMER_ID;
+      BeginDate          = BEGIN_DATE;
+      EndDate            = END_DATE;
+      BookingFee         = BOOKING_FEE;
+      TotalPrice         = TOTAL_PRICE;
+      CurrencyCode       = CURRENCY_CODE;
+      Description        = DESCRIPTION;
+      Attachment         = ATTACHMENT;
+      MimeType           = MIME_TYPE;
+      FileName           = FILE_NAME;
+      OverallStatus      = OVERALL_STATUS;
+      CreatedBy          = CREATED_BY;
+      CreatedAt          = CREATED_AT;
+      LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
+      LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+      LastChangedAt      = LAST_CHANGED_AT;
+    }
+
+  // create booking by association
+  association _Booking { create ( features : instance ); with draft; }
 }
 
 define behavior for ZRAP110_R_BOOKINGTP_THO alias Booking
 implementation in class zrap110_BP_BookingTP_THO unique
-persistent table ZRAP110_ABOOKTHO
-draft table ZRAP110_DBOOKTHO
+persistent table zrap110_abooktho
+draft table zrap110_dbooktho
 etag master LocalLastChangedAt
 lock dependent by _Travel
 authorization dependent by _Travel
+late numbering
 
 {
   field ( readonly )
-   TravelID,
-   LocalLastChangedAt;
+  TravelID,
+  LocalLastChangedAt;
 
-  field ( readonly : update )
-   BookingID;
-
+  //static field control
+  field ( readonly ) BookingID;
+  field ( mandatory ) CustomerID, CarrierID, Flightdate, BookingStatus;
 
   update;
   delete;
 
-  mapping for ZRAP110_ABOOKTHO
-  {
-    TravelID = TRAVEL_ID;
-    BookingID = BOOKING_ID;
-    BookingDate = BOOKING_DATE;
-    CustomerID = CUSTOMER_ID;
-    CarrierID = CARRIER_ID;
-    ConnectionID = CONNECTION_ID;
-    FlightDate = FLIGHT_DATE;
-    BookingStatus = BOOKING_STATUS;
-    FlightPrice = FLIGHT_PRICE;
-    CurrencyCode = CURRENCY_CODE;
-    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
-  }
+  //validation(s)
+  validation validateBookingStatus on save { create; field BookingStatus; }
+
+  //determination(s)
+  determination setInitialBookingValues on modify { create; } //copy & paste
+  determination calculateTotalPrice on modify { create; field FlightPrice, CurrencyCode; }  //**
+
+  //function(s)
+  function getDaysToFlight result [1] ZRAP110_A_DaysToFlight_THO;
+
+  mapping for zrap110_abooktho
+    {
+      TravelID           = TRAVEL_ID;
+      BookingID          = BOOKING_ID;
+      BookingDate        = BOOKING_DATE;
+      CustomerID         = CUSTOMER_ID;
+      CarrierID          = CARRIER_ID;
+      ConnectionID       = CONNECTION_ID;
+      FlightDate         = FLIGHT_DATE;
+      FlightPrice        = FLIGHT_PRICE;
+      CurrencyCode       = CURRENCY_CODE;
+      BookingStatus      = BOOKING_STATUS;
+      LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    }
 
   association _Travel { with draft; }
 }
