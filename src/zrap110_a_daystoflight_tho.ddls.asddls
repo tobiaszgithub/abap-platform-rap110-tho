@@ -1,9 +1,9 @@
 @EndUserText.label: 'Abstract entity for Days To Flight'
 define abstract entity ZRAP110_A_DaysToFlight_THO
 {
-  initial_days_to_flight : ABAP.INT4;
-  remaining_days_to_flight : ABAP.INT4;
-  booking_status_indicator : ABAP.INT4;
-  days_to_flight_indicator : ABAP.INT4;
+  initial_days_to_flight : abap.int8;
+  remaining_days_to_flight : abap.int8;
+  booking_status_indicator : abap.int8;
+  days_to_flight_indicator : abap.int8;
   
 }

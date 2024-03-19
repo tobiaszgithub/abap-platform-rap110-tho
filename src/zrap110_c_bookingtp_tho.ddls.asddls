@@ -84,19 +84,19 @@ define view entity ZRAP110_C_BOOKINGTP_THO
 
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZRAP110_CALC_BOOK_ELEM_THO'
           @EndUserText.label: 'Booking Status Indicator'
-  virtual BookingStatusIndicator : abap.int1,
+  virtual BookingStatusIndicator : abap.int4,
 
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZRAP110_CALC_BOOK_ELEM_THO'
           @EndUserText.label: 'Initial Days to Flight'
-  virtual InitialDaysToFlight    : abap.int1,
+  virtual InitialDaysToFlight    : abap.int4,
 
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZRAP110_CALC_BOOK_ELEM_THO'
           @EndUserText.label: 'Remaining Days to Flight'
-  virtual RemainingDaysToFlight  : abap.int1,
+  virtual RemainingDaysToFlight  : abap.int4,
 
           @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZRAP110_CALC_BOOK_ELEM_THO'
           @EndUserText.label: 'Days to Flight Indicator'
-  virtual DaysToFlightIndicator  : abap.int1,
+  virtual DaysToFlightIndicator  : abap.int4,
 
           LocalLastChangedAt,
 

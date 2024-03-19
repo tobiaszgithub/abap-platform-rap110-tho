@@ -27,6 +27,33 @@ ENDCLASS.
 CLASS lhc_booking IMPLEMENTATION.
 
   METHOD getDaysToFlight.
+    DATA: c_booking_entity TYPE zrap110_c_bookingtp_tho,
+          bookings_result  TYPE TABLE FOR FUNCTION RESULT zrap110_r_traveltp_tho\\booking~getDaysToFlight,
+          booking_result   LIKE LINE OF bookings_result.
+
+    READ ENTITIES OF zrap110_r_traveltp_tho IN LOCAL MODE
+      ENTITY Booking
+      FIELDS ( TravelID BookingStatus BookingID FlightDate BookingDate )
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(bookings).
+
+
+    LOOP AT bookings ASSIGNING FIELD-SYMBOL(<ls_booking>).
+      c_booking_entity = CORRESPONDING #( <ls_booking> ).
+      booking_result = CORRESPONDING #( <ls_booking> ).
+
+      booking_result-%param =
+        CORRESPONDING #( zrap110_calc_book_elem_tho=>calculate_days_to_flight( c_booking_entity )
+                               MAPPING booking_status_indicator = BookingStatusIndicator
+                                       days_to_flight_indicator = DaysToFlightIndicator
+                                       initial_days_to_flight = InitialDaysToFlight
+                                       remaining_days_to_flight = RemainingDaysToFlight ).
+
+      APPEND booking_result TO bookings_result.
+    ENDLOOP.
+
+    result = bookings_result.
+
   ENDMETHOD.
 
   METHOD calculateTotalPrice.

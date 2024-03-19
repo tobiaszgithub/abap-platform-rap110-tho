@@ -5,14 +5,15 @@ CLASS zrap110_calc_book_elem_THO DEFINITION
 
   PUBLIC SECTION.
     INTERFACES if_sadl_exit_calc_element_read .
-
-  PROTECTED SECTION.
-  PRIVATE SECTION.
     CLASS-METHODS calculate_days_to_flight
       IMPORTING
         is_original_data TYPE zrap110_c_bookingtp_tho
       RETURNING
         VALUE(result)    TYPE zrap110_c_bookingtp_tho.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
 ENDCLASS.
 
 CLASS zrap110_calc_book_elem_THO IMPLEMENTATION.
