@@ -1,9 +1,15 @@
 CLASS lsc_zrap110_r_traveltp_tho DEFINITION INHERITING FROM cl_abap_behavior_saver.
 
   PROTECTED SECTION.
+    CONSTANTS:
+      BEGIN OF travel_status,
+        open     TYPE c LENGTH 1 VALUE 'O', "Open
+        accepted TYPE c LENGTH 1 VALUE 'A', "Accepted
+        rejected TYPE c LENGTH 1 VALUE 'X', "Rejected
+      END OF travel_status.
 
     METHODS adjust_numbers REDEFINITION.
-
+    METHODS save_modified REDEFINITION.
 ENDCLASS.
 
 CLASS lsc_zrap110_r_traveltp_tho IMPLEMENTATION.
@@ -72,6 +78,45 @@ CLASS lsc_zrap110_r_traveltp_tho IMPLEMENTATION.
 
     ENDIF.
 
+  ENDMETHOD.
+
+  METHOD save_modified.
+    IF update IS NOT INITIAL.
+      RAISE ENTITY EVENT zrap110_r_traveltp_tho~travel_accepted
+        FROM VALUE #(
+          FOR travel IN update-travel
+            WHERE ( %control-OverallStatus EQ if_abap_behv=>mk-on AND
+                    OverallStatus EQ travel_status-accepted )
+                    "transferred information
+                    (
+                      %key = travel-%key
+                      agency_id      = travel-AgencyID
+                      customer_id    = travel-CustomerID
+                      overall_status = travel-OverallStatus
+                      description    = travel-Description
+                      total_price    = travel-TotalPrice
+                      currency_code  = travel-CurrencyCode
+                      begin_date     = travel-BeginDate
+                      end_date       = travel-EndDate
+                    )
+        ).
+
+
+*      DATA: lt_event_travel_accepted TYPE TABLE FOR EVENT zrap110_r_traveltp_tho~travel_accepted.
+*
+*      RAISE ENTITY EVENT zrap110_r_traveltp_tho~travel_accepted
+*        FROM lt_event_travel_accepted.
+
+      RAISE ENTITY EVENT zrap110_r_traveltp_tho~travel_rejected
+       FROM VALUE #(
+         FOR travel IN update-travel
+           WHERE ( %control-OverallStatus EQ if_abap_behv=>mk-on
+                   AND OverallStatus EQ travel_status-rejected )
+                ( %key = travel-%key )
+        ).
+
+
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.

@@ -1,0 +1,15 @@
+CLASS zrap110_travel_event_handl_tho DEFINITION
+  PUBLIC
+  FINAL
+  FOR EVENTS OF zrap110_r_traveltp_tho
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zrap110_travel_event_handl_tho IMPLEMENTATION.
+ENDCLASS.
